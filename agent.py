@@ -26,7 +26,7 @@ class ComportTemporal(TimedBehaviour):
     def on_time(self):
         super(ComportTemporal, self).on_time()
         var = num + 136
-        mensaje = '[Agente_1] 29/02/2020 14:42:46.' + num + ' --> ¡Estoy escuchando'
+        mensaje = '¡Estoy escuchando!'
         print(mensaje)
         #display_message('Agente_1', '¡Estoy escuchando!')
         #my_message('Hola soy el Agente.')
