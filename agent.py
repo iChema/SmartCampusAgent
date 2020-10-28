@@ -5,6 +5,7 @@
 ### pip3 install python-socketio ###
 ### pip3 install numpy ###
 ### pip3 install -U scikit-fuzzy ###
+### pip3 install pymongo ###
 
 from pade.misc.utility import display_message, start_loop, call_later
 from pade.core.agent import Agent
@@ -17,6 +18,9 @@ import eventlet
 import socketio
 import numpy as np
 import skfuzzy as fuzz
+import pymongo as mongo
+import uuid, re
+import bluetooth
 
 ### Agente ###
 class ComportTemporal(TimedBehaviour):
@@ -46,6 +50,12 @@ class HelloAgent(Agent):
         super(HelloAgent,self).on_start()
         #self.call_later(10.0, self.say_hello)
         sio.connect('http://localhost:3000')
+        cliente = mongo.MongoClient("mongodb://localhost:27017/")
+        db = cliente['smart_campus']
+        agentes = db['agents'].find_one()
+        print(agentes)
+        print (':'.join(re.findall('..', '%012x' % uuid.getnode())))
+        print (bluetooth.discover_devices())
 
     def say_hello(self):
         display_message(self.aid.localname, "Hello, I\'m an agent!")
