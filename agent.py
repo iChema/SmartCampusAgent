@@ -6,6 +6,8 @@
 ### pip3 install numpy ###
 ### pip3 install -U scikit-fuzzy ###
 ### pip3 install pymongo ###
+### pip3 install pybluez ###
+### pip3 install python-dotenv ###
 
 from pade.misc.utility import display_message, start_loop, call_later
 from pade.core.agent import Agent
@@ -14,13 +16,17 @@ from pade.acl.aid import AID
 from pade.behaviours.protocols import TimedBehaviour
 from sys import argv
 from aiohttp import web
+from socket_connecotr import sio
 import eventlet
-import socketio
 import numpy as np
 import skfuzzy as fuzz
-import pymongo as mongo
 import uuid, re
 import bluetooth
+from database import update_status
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 ### Agente ###
 class ComportTemporal(TimedBehaviour):
@@ -29,65 +35,37 @@ class ComportTemporal(TimedBehaviour):
 
     def on_time(self):
         super(ComportTemporal, self).on_time()
-        var = num + 136
-        mensaje = '¡Estoy escuchando!'
-        print(mensaje)
-        #display_message('Agente_1', '¡Estoy escuchando!')
-        #my_message('Hola soy el Agente.')
-
-class AgenteHelloWorld(Agent):
-    def __init__(self, aid):
-        super(AgenteHelloWorld, self).__init__(aid=aid, debug=False)
-        comp_temp = ComportTemporal(self, 1.0)
-        self.behaviours.append(comp_temp)
-        sio.wait()
-
-class HelloAgent(Agent):
-    def __init__(self, aid):
-        super(HelloAgent, self).__init__(aid=aid, debug=False)
+        print('Aqui ando')
 
     def on_start(self):
-        super(HelloAgent,self).on_start()
-        #self.call_later(10.0, self.say_hello)
-        sio.connect('http://localhost:3000')
-        cliente = mongo.MongoClient("mongodb://localhost:27017/")
-        db = cliente['smart_campus']
-        agentes = db['agents'].find_one()
-        print(agentes)
-        print (':'.join(re.findall('..', '%012x' % uuid.getnode())))
-        print (bluetooth.discover_devices())
+        super(ComportTemporal, self).on_start()
 
-    def say_hello(self):
-        display_message(self.aid.localname, "Hello, I\'m an agent!")
+        # Update database
+        update_status(my_id)
 
-### Socket ###
-sio = socketio.Client()
+        # Socket
+        sio.connect(os.getenv('SOCKET_URI'))
 
-@sio.event
-def connect():
-    print('connection established')
+class Agente(Agent):
+    def __init__(self, aid):
+        super(Agent, self).__init__(aid=aid, debug=False)
 
-@sio.event
-def my_message(data):
-    #print('message received with ', data)
-    sio.emit('my response', {'response': 'my response'})
+        comp_temp = ComportTemporal(self, 5.0)
 
-@sio.on('hola')
-def hola(data):
-    print(data)
+        self.behaviours.append(comp_temp)
 
-@sio.event
-def disconnect():
-    print('disconnected from server')
+        sio.wait()
 
 if __name__ == '__main__':
+    # Get ID
+    # TODO esta mac address es de Chema, comenatar para tomar la real 
+    mac = ["dc:fb:48:29:94:d7"]
+    # mac = bluetooth.read_local_bdaddr()
+    my_id = int(mac[-1].replace(':', ''), 16)
 
-    agents = list()
+    # Turn On Agent
+    agents_list = list()
+    agente = Agente(AID(name=str(my_id)))
+    agents_list.append(agente)
 
-    num = 133
-    agente_hello = AgenteHelloWorld(AID(name='Agent2'))
-    hello_agent = HelloAgent(AID(name='Agent'))
-    agents.append(hello_agent)
-    agents.append(agente_hello)
-
-    start_loop(agents)
+    start_loop(agents_list)
