@@ -59,7 +59,7 @@ class Agente(Agent):
 if __name__ == '__main__':
     # Get ID
     # TODO esta mac address es de Chema, comenatar para tomar la real 
-    mac = ["dc:fb:48:29:94:d7"]
+    mac = [os.getenv('CHEMA_MAC')]
     # mac = bluetooth.read_local_bdaddr()
     my_id = int(mac[-1].replace(':', ''), 16)
 
