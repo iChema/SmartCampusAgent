@@ -22,11 +22,14 @@ import numpy as np
 import skfuzzy as fuzz
 import uuid, re
 import bluetooth
+from bluetooth.ble import BeaconService
 from database import update_status
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
+
+service = BeaconService()
 
 ### Agente ###
 class ComportTemporal(TimedBehaviour):
@@ -36,6 +39,9 @@ class ComportTemporal(TimedBehaviour):
     def on_time(self):
         super(ComportTemporal, self).on_time()
         print('Aqui ando')
+
+        service.start_advertising("11111111-2222-3333-4444-555555555555",1, 1, 1, 200)
+
 
     def on_start(self):
         super(ComportTemporal, self).on_start()
@@ -59,8 +65,8 @@ class Agente(Agent):
 if __name__ == '__main__':
     # Get ID
     # TODO esta mac address es de Chema, comenatar para tomar la real 
-    mac = [os.getenv('CHEMA_MAC')]
-    # mac = bluetooth.read_local_bdaddr()
+    #mac = [os.getenv('CHEMA_MAC')]
+    mac = bluetooth.read_local_bdaddr()
     my_id = int(mac[-1].replace(':', ''), 16)
 
     # Turn On Agent
