@@ -19,7 +19,7 @@ from aiohttp import web
 from socket_connecotr import sio
 import eventlet
 import numpy as np
-import skfuzzy as fuzz
+#import skfuzzy as fuzz
 import uuid, re
 import bluetooth
 from bluetooth.ble import BeaconService
@@ -29,7 +29,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-service = BeaconService()
 
 ### Agente ###
 class ComportTemporal(TimedBehaviour):
@@ -39,8 +38,10 @@ class ComportTemporal(TimedBehaviour):
     def on_time(self):
         super(ComportTemporal, self).on_time()
         print('Aqui ando')
-
-        service.start_advertising("11111111-2222-3333-4444-555555555555",1, 1, 1, 200)
+        nearby_devices = bluetooth.discover_devices()
+        print (nearby_devices)
+        #service = BeaconService()
+        #service.start_advertising("FB9D5288-F0D3-49CC-B642-50F9C9378DA0",1, 1, 1, 200)
 
 
     def on_start(self):
